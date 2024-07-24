@@ -1,21 +1,24 @@
-// Step 1: Initialize Google Cloud Storage
-const {Storage} = require('@google-cloud/storage');
+require('dotenv').config();
+const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const express = require('express');
 const app = express();
 const port = 3000;
 
-// Initialize Google Cloud Storage client
+// Initialize Google Cloud Storage client using environment variables
 const storage = new Storage({
-  keyFilename: '../myKey.json',
-  projectId: 'your-project-id',
+  projectId: process.env.PROJECT_ID,
+  credentials: {
+    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.CLIENT_EMAIL
+  }
 });
 const bucket = storage.bucket('your-bucket-name');
 
-// Step 2: Configure Multer for File Uploads
-const multerMiddleware = multer({storage: multer.memoryStorage()});
+// Configure Multer for File Uploads
+const multerMiddleware = multer({ storage: multer.memoryStorage() });
 
-// Step 3: Upload Files to Google Cloud Storage
+// Upload Files to Google Cloud Storage
 app.post('/upload', multerMiddleware.single('file'), (req, res) => {
   if (!req.file) {
     res.status(400).send('No file uploaded.');
@@ -33,13 +36,13 @@ app.post('/upload', multerMiddleware.single('file'), (req, res) => {
   blobStream.on('finish', () => {
     // The public URL can be used to directly access the file via HTTP.
     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    res.status(200).send({url: publicUrl});
+    res.status(200).send({ url: publicUrl });
   });
 
   blobStream.end(req.file.buffer);
 });
 
-// Step 4: Verify and Test
+// Verify and Test
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });

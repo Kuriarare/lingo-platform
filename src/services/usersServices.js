@@ -8,6 +8,11 @@ const storage = new Storage({
 });
 const bucket = storage.bucket("lingo-academy-avatar");
 
+require('dotenv').config();
+
+const secret = process.env.JWT_SECRET;
+
+
 module.exports = {
   getUser: async ({ email, password }) => {
     try {
@@ -21,7 +26,6 @@ module.exports = {
       }
       // Issue token
       const payload = { email };
-      const secret = "secret";
       const token = jwt.sign(payload, secret, {
         expiresIn: "1h",
       });
@@ -37,7 +41,6 @@ module.exports = {
       const newUser = await User.create(user);
       // After creating the user, generate a token
       const payload = { email: newUser.email };
-      const secret = "secret"; // Consider using an environment variable for the secret
       const token = jwt.sign(payload, secret, {
         expiresIn: "1h",
       });
@@ -50,7 +53,7 @@ module.exports = {
 
   getUserData: async (token) => {
     try {
-      const decoded = jwt.verify(token, "secret");
+      const decoded = jwt.verify(token, secret);
       const { email } = decoded;
       const userData = await User.findOne({ email });
       return userData;
@@ -62,7 +65,7 @@ module.exports = {
 
   uploadAvatar: async (file, token) => {
     try {
-      const decoded = jwt.decode(token, "secret");
+      const decoded = jwt.decode(token, secret);
       const { email } = decoded;
 
       const user = await User.findOne({ email: email });

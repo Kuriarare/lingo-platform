@@ -9,7 +9,9 @@ const router = Router();
 
 // Step 2: Configure Multer for File Uploads
 const multerMiddleware = multer({storage: multer.memoryStorage()});
-
+router.get('/', (req, res) => {
+    res.send('Hello World');
+});
 router.post('/login', loginController);
 router.post('/register', registerController);
 router.get('/userdata', userDataController);

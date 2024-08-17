@@ -1,22 +1,13 @@
-// const app = require("./src/server");
-// const dbCon = require('./src/config/dbCon');
 
-// dbCon().then(() => {
-//     app.listen(3001, () => {
-//         console.log("Server is running on http://localhost:3001");
-//       });
-// }).catch((error) => {
-//   console.log("DB Connection Error:", error);
-// });
-
-
+require('dotenv').config({ path: '/var/www/lingo-academy-server/.env' });
 
 const server = require('./src/server');
-const dbCon = require('./src/config/dbCon');
+const dbCon =  require('./src/config/dbCon');
+const PORT = 8000;
 
 dbCon().then(() => {
-  server.listen(3001, () => {
-    console.log("Server is running on http://localhost:3001");
+  server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
   });
 }).catch((error) => {
   console.log("DB Connection Error:", error);

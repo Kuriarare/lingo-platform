@@ -85,7 +85,7 @@ module.exports = {
       return new Promise((resolve, reject) => {
         blobStream.on("error", (err) => reject(err));
         blobStream.on("finish", async () => {
-          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+          const publicUrl = `http://storage.googleapis.com/${bucket.name}/${blob.name}`;
           try {
             await User.findOneAndUpdate(
               { email: email },

@@ -1,7 +1,6 @@
 const {Router} = require('express');
-const {Storage} = require('@google-cloud/storage');
 const multer = require('multer');
-
+// const { bucket, multerMiddleware } = require('./storageAndMulterConfig');
 const {registerController, loginController, userDataController, avatarController, updateUserController, deleteUserController} = require('../controllers/usersController');
 const router = Router();
 

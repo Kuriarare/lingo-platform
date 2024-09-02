@@ -1,16 +1,22 @@
 const jwt = require("jsonwebtoken");
-const { Storage } = require("@google-cloud/storage");
+const { Storage } = require('@google-cloud/storage');
 const User = require("../models/User");
+require('dotenv').config();
+
 
 const storage = new Storage({
-  keyFilename: "../back/myKey.json",
-  projectId: "caramel-granite-427322-e7",
+  projectId: process.env.PROJECT_ID,
+  credentials: {
+    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.CLIENT_EMAIL
+  }
 });
 const bucket = storage.bucket("lingo-academy-avatar");
 
-require('dotenv').config();
+
 
 const secret = process.env.JWT_SECRET;
+
 
 
 module.exports = {
@@ -27,7 +33,7 @@ module.exports = {
       // Issue token
       const payload = { email };
       const token = jwt.sign(payload, secret, {
-        expiresIn: "1h",
+        expiresIn: "8h",
       });
       return { token, user };
     } catch (error) {
@@ -66,7 +72,10 @@ module.exports = {
   uploadAvatar: async (file, token) => {
     try {
       const decoded = jwt.decode(token, secret);
+      console.log('Decoded token:', decoded);
+      
       const { email } = decoded;
+      console.log('User email:', email);
 
       const user = await User.findOne({ email: email });
       if (!user) throw new Error("User not found");
@@ -104,6 +113,8 @@ module.exports = {
         });
         blobStream.end(file.buffer);
       });
+
+      
     } catch (error) {
       console.log("The service had an error uploading the avatar:", error);
       throw error;

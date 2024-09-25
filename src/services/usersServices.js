@@ -22,7 +22,7 @@ const secret = process.env.JWT_SECRET;
 module.exports = {
   getUser: async ({ email, password }) => {
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).populate("students").populate("teacher");
       if (!user) {
         throw new Error("User not found");
       }
@@ -154,5 +154,30 @@ module.exports = {
       console.log("The service had an error deleting the user:", error);
       throw error;
     }
+  },
+
+  assignStudentService: async (body) => {
+    const { teacherId, studentId, events } = body;
+    try{
+      const teacher = await User.assignStudentToTeacher(teacherId, studentId, events);
+      return teacher;
+    }
+    catch(error){
+      console.log("The service had an error assigning the student:", error);
+      throw error;
   }
-};
+},
+
+getUsersService: async () => {
+  try {
+    const users = await User.find();
+    if (!users) {
+      throw new Error("No users found");
+    }
+    return users;
+  } catch (error) {
+    console.log("The service had an error getting the users:", error);
+    throw error;
+  }
+}
+}

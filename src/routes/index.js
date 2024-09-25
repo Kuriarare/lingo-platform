@@ -1,7 +1,7 @@
 const {Router} = require('express');
 const multer = require('multer');
-// const { bucket, multerMiddleware } = require('./storageAndMulterConfig');
-const {registerController, loginController, userDataController, avatarController, updateUserController, deleteUserController} = require('../controllers/usersController');
+const {registerController, loginController, userDataController, avatarController, updateUserController, deleteUserController, assignStudentController, getUsersController} = require('../controllers/usersController');
+const {chatsController} = require('../controllers/chatsController');
 const router = Router();
 
 
@@ -16,7 +16,10 @@ router.post('/register', registerController);
 router.get('/userdata', userDataController);
 router.post('/uploadavatar', multerMiddleware.single('file'), avatarController);
 router.post('/updateuser', updateUserController)
+router.post('/assignstudent', assignStudentController);
 router.delete('/deleteuser', deleteUserController);
+router.get('/allusers', getUsersController);
+router.get('/messages/:room', chatsController);
 
 
 module.exports = router;

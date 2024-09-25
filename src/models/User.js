@@ -14,8 +14,20 @@ const userSchema = new mongoose.Schema({
   address: { type: String, required: false },
   phone: { type: String, required: false },
   role: { type: String, enum: ['user', 'teacher', 'admin'], default: 'user' }, 
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For teachers
+  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // For students
+  schedule: [
+    {
+      date: { type: String, required: false }, // e.g., '2024-09-05'
+      startTime: { type: String, required: false }, // e.g., '14:00'
+      endTime: { type: String, required: false }, // e.g., '15:00'
+      dayOfWeek: { type: String, required: false }, // e.g., 'Monday'
+      teacherName: { type: String, required: false }, // Teacher's name
+      studentName: { type: String, required: false }, // Student's name
+      studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Student's ID
+    }
+  ],
 });
-
 
 // Hash the password before saving the user model
 userSchema.pre('save', function(next) {
@@ -42,6 +54,42 @@ userSchema.methods.isCorrectPassword = async function(password) {
   }
 };
 
+
+userSchema.statics.assignStudentToTeacher = async function(teacherId, studentId, events) {
+  try {
+    const teacher = await this.findById(teacherId);
+    const student = await this.findById(studentId);
+
+    if (!teacher || teacher.role !== 'teacher') {
+      throw new Error('Teacher not found or not a teacher.');
+    }
+    if (!student || student.role !== 'user') {
+      throw new Error('Student not found or not a student.');
+    }
+
+    const updatedEvents = events.map(event => ({
+      ...event,
+      studentId: student._id,  
+    }));
+
+    teacher.students.push(student._id);
+    student.teacher = teacher._id;
+
+    student.schedule = [...(student.schedule || []), ...updatedEvents];
+    teacher.schedule = [...(teacher.schedule || []), ...updatedEvents];
+    
+    await teacher.save();
+    await student.save();
+
+    return 'Teacher updated successfully';
+  } catch (error) {
+    throw new Error(`Failed to assign student to teacher: ${error.message}`);
+  }
+};
+
+
+
+
 const User = mongoose.model('User', userSchema);
 
-module.exports =  User ;
+module.exports = User;
